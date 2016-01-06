@@ -47,7 +47,12 @@ return 0
 }
 
 function usage {
-  echo "Usage: $0 [--poweball|--mega] # # # # # #" >&2
+  cat <<_EOF >&2
+Usage: $0 [--poweball|--mega] # # # # # #
+
+numbers.txt must exist with your picks, in the format:
+1 2 3 4 5 +6 ticket_id\n
+_EOF
   exit 1
 }
 
