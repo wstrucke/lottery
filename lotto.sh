@@ -31,7 +31,7 @@ function check_win_pb {
 # $1 numbers matched
 # $2 bonus matched (0|1)
 case "$1+$2" in
-  "5+1") echo -n "JACKPOT:  "; W=$(($W+500000000));;
+  "5+1") echo -n "JACKPOT:  "; W=$(($W+800000000));;
   "5+0") echo -n "\$1,000,000: "; W=$(($W+1000000));;
   "4+1") echo -n "\$10,000: "; W=$(($W+10000));;
   "4+0") echo -n "\$100:     "; W=$(($W+100));;
@@ -46,12 +46,27 @@ esac
 return 0
 }
 
+function colorize_output {
+  local string="$1"; shift
+  local c=0
+  grep -qE '(^| )('$1'|'$2'|'$3'|'$4'|'$5')( |$)'
+  while [ $? -eq 0 ]; do
+    string=$( echo -e "$( echo $string |sed -E 's/ ([0-9]{5})/ '$B'[\1]'$STOP'/; s/(^| )('$1'|'$2'|'$3'|'$4'|'$5')( |$)/\1'$G'\2'$STOP'\3/' )" )
+    c=$((c+1))
+    if [[ $c -gt 10 ]]; then exit 1; fi
+    echo "$string" |grep -qE '(^| )('$1'|'$2'|'$3'|'$4'|'$5')( |$)'
+  done
+  echo -e "$( echo $string |sed -E 's/\+'$6' /\+'${G}${6}${STOP}' /' )"
+}
+
 function usage {
   cat <<_EOF >&2
 Usage: $0 [--poweball|--mega] # # # # # #
 
 numbers.txt must exist with your picks, in the format:
 1 2 3 4 5 +6 ticket_id\n
+
+Valid numbers for Powerball are 1-69 +1-26
 _EOF
   exit 1
 }
@@ -87,7 +102,7 @@ while read line; do
   echo $line |grep -qE " $5 " && MATCH=$(($MATCH+1))
   echo $line |grep -qE '\+'$6'' && BONUS=1
   check_win $MATCH $BONUS
-  test $? -eq 0 && echo -e "$( echo $line |sed -E 's/([0-9]{5})/'$B'[\1]'$STOP'/; s/(^|[ +])('$1'|'$2'|'$3'|'$4'|'$5'|'$6')([ +]|$)/\1'$G'\2\3'$STOP'/g' )"
+  test $? -eq 0 && colorize_output "$line" $@
 done <numbers.txt
 
 if [[ "$W" -eq 0 ]]; then
