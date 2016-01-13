@@ -73,6 +73,7 @@ _EOF
 }
 
 # Defaults
+DEBUG=0
 MM=1
 PB=0
 
@@ -81,16 +82,16 @@ B="\\\033[38;5;32m"
 G="\\\033[38;5;34m"
 STOP="\\\033[39m"
 
-if [[ "${1:0:1}" == "-" ]]; then case $1 in
+while [[ "${1:0:1}" == "-" ]]; do case $1 in
   --powerball) PB=1; MM=0;;
   --mega) PB=0; MM=1;;
+  --debug) DEBUG=1;;
   *) usage;;
-esac; shift; fi
+esac; shift; done
 
 if [ $# -ne 6 ]; then usage; fi
 if [ ! -f numbers.txt ]; then usage; fi
 
-DEBUG=0
 W=0
 N1="$1"
 N2="$2"
